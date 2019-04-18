@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+      .drag {
+        width: 400px;
+        background: #ddd;
+        text-align: center;
+        line-height: 200px;
+      }
+
+      .textarea {
+        display: block;
+        height: 200px;
+        border: 1px dashed #aaa;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div>
+      <h2>普通上传</h2>
+      <input
+        type="file"
+        multiple
+        name="file"
+        id="commonUpload"
+        onchange="commomUpload()"
+      />
+    </div>
+    <div>
+      <h2>拖拽上传</h2>
+      <div id="drag" class="drag">
+        拖拽上传
+      </div>
+    </div>
+    <div>
+      <h2>粘贴上传</h2>
+      <div
+        contenteditable
+        spellcheck="false"
+        id="textarea"
+        class="textarea"
+      ></div>
+    </div>
+  </body>
+</html>
+<script>
+  function upload(files) {
+    let formData = new FormData();
+    formData.append("files", files);
+    axios({
+      method: "post",
+      url: "/upload",
+      data: formData
+    })
+      .then(res => {})
+      .catch(e => e);
+  }
+
+  function commomUpload() {
+    const files = document.querySelector("#commonUpload").files;
+    upload(files);
+  }
+
+  // 拖拽上传
+  const drag = document.querySelector("#drag");
+  drag.addEventListener("dragover", function(e) {
+    e.preventDefault();
+  });
+  drag.addEventListener("drop", function(e) {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    upload(files);
+  });
+
+  // 粘贴上传
+  const textarea = document.querySelector("#textarea");
+  textarea.addEventListener("paste", function(e) {
+    const items = e.clipboardData.items;
+    console.log(e.clipboardData);
+    let arr = [];
+    for (let i = 0, len = items.length; i < len; i++) {
+      if (items[i].kind === "string" && items[i].type === "text/plain") {
+        items[i].getAsString(function(str) {
+          arr.push(str);
+          console.log(arr);
+        });
+      } else if (items[i].kind === "file") {
+        const file = e.clipboardData.files[0];
+        upload(files);
+      }
+    }
+    // debugger
+  });
+</script>
