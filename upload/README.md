@@ -3,15 +3,17 @@
 - `application/x-www-form-urlencoded` 默认表单类型
 - `multipart/form-data`包含文件（多媒体）自动切换成这个类型
 
-## 拖拽上传
+## 上传方式
+
+### 拖拽上传
 
 基于`DataTransfer`
 
 - 需要在`dragover`配合`drop`事件，取消默认事件，获取文件列表，否则页面会定向到拖曳的图片
 
-## 粘贴上传
+### 粘贴上传
 
-`clipboardData`,基于`DataTransfer`
+`clipboardData`,基于`DataTransfer`。依截图形式，目测只能上传一张图片
 
 `clipboardData.items`的`kind`和`type`能获取粘贴的相关内容
 
@@ -26,7 +28,7 @@ if (items[i].kind === "file") {
 }
 ```
 
-### 兼容性问题
+#### 兼容性问题
 
 - 存在地方
 
@@ -46,9 +48,33 @@ if (items[i].kind === "file") {
       - 非 ie ：参数一样是`MIME`类型，但不能识别`text`类型
     - `content`内容
 
+## 文件转换
+
+### 文件类型
+
+### Blob
+
+简述：不可变的类文件对象，二进制编码格式数据，`File`的父类对象。
+
+```js
+// 需要在图片加载完成时，把生成的objectURL清除，达到性能优化目的
+objectURL = URL.createObjectURL(blob);
+window.URL.revokeObjectURL(objectURL);
+```
+
+### FileReader
+
+异步读取文件。
+
+1. 配合`reader.readAsDataURL(file);`把图片文件转成`base64`。
+2. 通过`reader.onload`方法，得出结果`reader.result`
+
 ## TODO
 
-- 预览图片（图片的几种转换）
+- ~~预览图片（图片的几种转换）~~
+  - `URL.revokeObjectURL`可在`Web Worker`使用
+  - 文件转换方式
+- 界面重新布局
 - 压缩图片
 - 进度显示
 - 旋转图片

@@ -51,7 +51,54 @@
   </body>
 </html>
 <script>
-  function upload(files) {
+  function isImageFileType({ type }) {
+    return type.includes("image/");
+  }
+
+  function fileToUrl(file, isBlob) {
+    if (isBlob) {
+      // 记得要释放对象
+      return URL.createObjectURL(file);
+    } else {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      return new Promise(reslove => {
+        reader.onload = function() {
+          reslove(reader.result);
+        };
+      });
+    }
+  }
+
+  async function previewImg(files, isBlob) {
+    for (let file of files) {
+      // 判断是否是图片类型，是执行预览
+      if (isImageFileType(file)) {
+        file.thumbUrl = await fileToUrl(file, isBlob);
+      }
+    }
+    return files;
+  }
+
+  async function showImgs(files, isBlob = true) {
+    const imgs = await previewImg(files, isBlob);
+    for (let file of imgs) {
+      const div = document.createElement("div");
+      const img = new Image();
+      img.src = file.thumbUrl;
+      if (isBlob) {
+        img.onload = function(e) {
+          // 释放createObjectURL创建的对象
+          URL.revokeObjectURL(file.thumbUrl);
+        };
+      }
+      div.appendChild(img);
+      document.body.appendChild(div);
+    }
+  }
+
+  async function upload(files) {
+    showImgs(files);
     let formData = new FormData();
     formData.append("files", files);
     axios({
@@ -75,6 +122,8 @@
   });
   drag.addEventListener("drop", function(e) {
     e.preventDefault();
+    // 没有文件上传
+    if (!e.dataTransfer.files.length) return;
     const files = e.dataTransfer.files;
     upload(files);
   });
@@ -83,13 +132,11 @@
   const textarea = document.querySelector("#textarea");
   textarea.addEventListener("paste", function(e) {
     const items = e.clipboardData.items;
-    console.log(e.clipboardData);
     let arr = [];
     for (let i = 0, len = items.length; i < len; i++) {
       if (items[i].kind === "string" && items[i].type === "text/plain") {
         items[i].getAsString(function(str) {
           arr.push(str);
-          console.log(arr);
         });
       } else if (items[i].kind === "file") {
         const file = e.clipboardData.files[0];
