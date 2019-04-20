@@ -72,9 +72,10 @@ window.URL.revokeObjectURL(objectURL);
 ## TODO
 
 - ~~预览图片（图片的几种转换）~~
+  - 缩略图不变形研究
   - `URL.revokeObjectURL`可在`Web Worker`使用
   - 文件转换方式
-- 界面重新布局
+- ~~界面重新布局~~
 - 压缩图片
 - 进度显示
 - 旋转图片
